@@ -7,14 +7,17 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 public interface InvoiceRepo extends PagingAndSortingRepository<Invoice, Integer> {
-    @Query("SELECT c FROM Invoice c " +
-            "WHERE upper(c.number) like concat('%', upper(?1), '%')")
-    List<Invoice> findAllByNumber(String number, Pageable pageable);
 
-    List<Invoice> findAllByInvoiceDate(LocalDate date, Pageable pageable);
+    List<Invoice> findAllByNumberContainingIgnoreCase(String number, Pageable pageable);
+
+    @Query("SELECT c FROM Invoice c " +
+            "WHERE upper(c.number) like concat('%', upper(?1), '%') and " +
+            "c.invoiceDate = (?2)")
+    List<Invoice> findAllByDateAndNumber(String number,LocalDate date, Pageable pageable);
+
+    List<Invoice> findAllByInvoiceDate(LocalDate invoiceDate, Pageable pageable);
 
     Invoice findById(Long id);
 }

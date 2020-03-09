@@ -7,7 +7,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,13 +26,14 @@ public class InvoiceController {
     public Iterable<Invoice> list(
             @RequestParam(name = "number", required = false) String number,
             @RequestParam(name = "invoice_date", required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+                @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             @PageableDefault(sort = {"id"}, direction = Sort.Direction.DESC) Pageable pageable) {
-        if (!StringUtils.isEmpty(number)) {
-            return invoiceRepo.findAllByNumber(number, pageable);
-        }
-        if (!StringUtils.isEmpty(date)) {
-            return invoiceRepo.findAllByInvoiceDate(date, pageable);
+        if (!StringUtils.isEmpty(date) && !StringUtils.isEmpty(number)) {
+            return invoiceRepo.findAllByDateAndNumber(number,date, pageable);
+        }else if (!StringUtils.isEmpty(number) && StringUtils.isEmpty(date)) {
+            return invoiceRepo.findAllByNumberContainingIgnoreCase(number, pageable);
+        }else if(!StringUtils.isEmpty(date) && StringUtils.isEmpty(number)){
+            return invoiceRepo.findAllByInvoiceDate(date,pageable);
         }
         return invoiceRepo.findAll(pageable);
 
